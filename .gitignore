@@ -1,0 +1,9 @@
+# cookhub-server
+cookhub-server/.gradle/*
+cookhub-server/.idea/*
+cookhub-server/build/*
+cookhub-server/gradle/*
+cookhub-server/gradlew
+cookhub-server/gradlew.bat
+cookhub-server/settings.gradle
+cookhub-server/src/test/*
