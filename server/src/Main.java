@@ -7,17 +7,16 @@ import java.nio.charset.StandardCharsets;
 
 public class Main {
 
+
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(40055)) {
-            System.out.println("Server socket open.");
+        try (ServerSocket serverSocket = new ServerSocket(40056)) {
+            Logger.info("CookHub server is running. (Port : " + serverSocket.getLocalPort() + ")");
             while (true) {
-                System.out.println("Server socket is waiting...");
                 Socket socket = serverSocket.accept();
-                System.out.println("Request is accepted.");
                 new Thread(() -> handleRequest(socket)).start();
             }
         } catch (IOException e) {
-            System.err.println("Server socket failed.");
+            Logger.fatal(e.getMessage());
         }
     }
 
@@ -43,13 +42,12 @@ public class Main {
             httpResponse.reasonPhrase = "OK";
             httpResponse.contentType = "text/html";
             httpResponse.responseBody = readFile("server/resources/welcome.html");
-            System.out.println(httpResponse);
             byte[] responseBytes = httpResponse.toString().getBytes(StandardCharsets.UTF_8);
             outputStream.write(responseBytes);
             outputStream.close();
             socket.close();
         } catch (IOException e) {
-            System.err.println("Socket failed.");
+            Logger.error(e.getMessage());
         }
     }
 
