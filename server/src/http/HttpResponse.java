@@ -1,6 +1,6 @@
-package main;
+package main.http;
 
-public class HTTPResponse {
+public class HttpResponse {
 
     public String httpVersion = "";
     public int statusCode = -1;
