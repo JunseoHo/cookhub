@@ -4,15 +4,17 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class Main {
 
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(40056)) {
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
             Logger.info("CookHub server is running. (Port : " + serverSocket.getLocalPort() + ")");
             while (true) {
                 Socket socket = serverSocket.accept();
+                Logger.info("Request accepted.");
                 new Thread(() -> handleRequest(socket)).start();
             }
         } catch (IOException e) {
@@ -35,6 +37,21 @@ public class Main {
 
     private static void handleRequest(Socket socket) {
         try {
+
+            // 입력 스트림을 통해 클라이언트의 요청 읽기
+            InputStream inputStream = socket.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+            // HTTP 요청 헤더 읽기
+            StringBuilder requestStringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                requestStringBuilder.append(line).append("\n");
+            }
+
+            // 요청 정보 출력
+            System.out.println("Received HTTP Request:\n" + requestStringBuilder.toString());
+
             OutputStream outputStream = socket.getOutputStream();
             HTTPResponse httpResponse = new HTTPResponse();
             httpResponse.httpVersion = "HTTP/1.1";
