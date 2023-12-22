@@ -37,19 +37,10 @@ public class Main {
 
     private static void handleRequest(Socket socket) {
         try {
-            // 입력 스트림을 통해 클라이언트의 요청 읽기
-            InputStream inputStream = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            // HTTP 요청 헤더 읽기
-            StringBuilder requestStringBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                requestStringBuilder.append(line).append("\n");
-            }
-            // 요청 정보 출력
-            String request = requestStringBuilder.toString();
+            HTTPRequest request = make_request(socket);
             System.out.println("Received HTTP Request:\n" + request);
-            String fileName = request.split("\n")[0].split(" ")[1];
+//            String fileName = request.split("\n")[0].split(" ")[1];
+            String fileName = request.target;
             if (fileName.equals("/")) fileName = "welcome.html";
             System.out.println("file name : " + fileName);
             String fileExtension = fileName.split("\\.")[1];
@@ -60,6 +51,30 @@ public class Main {
         } catch (IOException e) {
             Logger.error(e.getMessage());
         }
+    }
+
+    private static HTTPRequest make_request(Socket socket) throws IOException {
+        InputStream inputStream = socket.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        // HTTP 요청 헤더 읽기
+        StringBuilder requestStringBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            requestStringBuilder.append(line).append("\n");
+        }
+        // 요청 정보 출력
+        HTTPRequest request = new HTTPRequest();
+        String requestAll = requestStringBuilder.toString();
+        request.method = requestAll.split("\n")[0].split(" ")[0];
+        request.target = requestAll.split("\n")[0].split(" ")[1];
+        request.httpVersion = requestAll.split("\n")[0].split(" ")[2];
+        request.hostInfo = requestAll.split("\n")[1];
+
+        // 세 번째 행부터 끝까지 추출
+        int startIndex = requestStringBuilder.indexOf("\n", requestStringBuilder.indexOf("\n") + 1) + 1;
+        request.headers = requestStringBuilder.substring(startIndex);
+
+        return request;
     }
 
     private static void make_response(String fileExtension, String filePath, OutputStream outputStream) throws IOException {
