@@ -8,14 +8,13 @@ import java.util.Arrays;
 
 public class Main {
 
-
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(0)) {
             Logger.info("CookHub server is running. (Port : " + serverSocket.getLocalPort() + ")");
             while (true) {
                 Socket socket = serverSocket.accept();
                 Logger.info("Request accepted.");
-                new Thread(() -> handleRequest(socket)).start();
+                new Thread(()->handleRequest(socket)).start();
             }
         } catch (IOException e) {
             Logger.fatal(e.getMessage());
