@@ -2,12 +2,27 @@ package main.http;
 
 public class HttpRequest extends HttpTransaction {
 
-    public HttpRequestMethod method;
-    public String target;
-    public String version;
+    private HttpRequestMethod method;
+    private String target;
+    private String version;
 
     public HttpRequest(String httpRequest) {
-        /* PARSE */
+        int lineNumber = 0;
+        String[] lines = httpRequest.split("\n");
+        String[] startLines = lines[lineNumber++].split(" ");
+        method = HttpRequestMethod.valueOf(startLines[0]);
+        target = startLines[1];
+        version = startLines[2];
+        while (lineNumber < lines.length) {
+            if (lines[lineNumber].equals("\n") || lines[lineNumber].isBlank()) break;
+            String[] headers = lines[lineNumber].split(":");
+            setHeader(headers[0], headers[1]);
+            ++lineNumber;
+        }
+        while (++lineNumber < lines.length) {
+            if (getBody() == null) setBody(lines[lineNumber]);
+            else setBody(getBody() + "\n" + lines[lineNumber]);
+        }
     }
 
     public HttpRequestMethod getMethod() {

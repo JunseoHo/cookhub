@@ -13,10 +13,9 @@ import java.nio.charset.StandardCharsets;
 
 public class Server {
 
-    private Router router = new Router();
+    private final Controller controller = new Controller();
 
     public void run(int port) {
-        router.register(HttpRequestMethod.GET, "/welcome.html", Server::service);
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             Logger.info("CookHub server is running. (Port : " + serverSocket.getLocalPort() + ")");
             while (true) {
@@ -31,20 +30,20 @@ public class Server {
     private void handleRequest(Socket socket) {
         try (socket) {
             StringBuilder httpRequestStr = new StringBuilder();
-            for (byte b : socket.getInputStream().readAllBytes()) httpRequestStr.append((char) b);
+            InputStream in = socket.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null && !line.isEmpty()) httpRequestStr.append(line).append("\n");
             HttpRequest httpRequest = new HttpRequest(httpRequestStr.toString());
-            HttpResponse httpResponse = router.route(httpRequest);
-            // 1. read file
-            // 2. create http response
-            // 3. write response
+            HttpResponse httpResponse = controller.control(httpRequest);
+            OutputStream outputStream = socket.getOutputStream();
+            outputStream.write(httpResponse.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            outputStream.close();
+            Logger.info("Transaction : (" + httpRequest.getMethod() + ", " + httpRequest.getTarget() + ")");
         } catch (IOException e) {
             Logger.error(e.getMessage());
         }
-    }
-
-    private static HttpResponse service(HttpRequest request) {
-        /* process */
-        return null;
     }
 
 

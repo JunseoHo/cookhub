@@ -1,11 +1,12 @@
 package main.http;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpTransaction {
 
-    private Map<String, String> headers;
-    private String body;
+    private final Map<String, String> headers = new HashMap<>();
+    private String body = null;
 
     public String getHeader(String key) {
         return headers.get(key);
