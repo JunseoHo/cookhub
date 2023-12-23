@@ -1,6 +1,6 @@
 package main.http;
 
-enum HttpRequestMethod {
+public enum HttpRequestMethod {
 
     GET,
     HEAD,
